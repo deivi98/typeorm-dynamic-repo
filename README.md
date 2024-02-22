@@ -102,9 +102,9 @@ const orderEntities: [OrderEntity[], number] =
       ]
       where: [
         {
-          field: 'shopperId',
+          field: 'customerId',
           operator: FilterOperator.EQUAL,
-          value: shopperId,
+          value: customerId,
         },
       ],
       ordering: [
@@ -114,7 +114,7 @@ const orderEntities: [OrderEntity[], number] =
         }
       ]
     },
-    // This is needed because of special cyclical relation at fulfillment service
+    // This is needed because of special cyclical relation
     // (Order -> Article -> Replacement -> Article again)
     // Check info on FindOptions above for better understanding
     { allowRecursively: ['article'] }, 
@@ -123,21 +123,21 @@ const orderEntities: [OrderEntity[], number] =
 ...
 ```
 
-This example retrieves the entire shopper entity, including
+This example retrieves the entire Page entity, including
 all of its attributes, relations, attributes of its relations,
 relation of its relations... recursively
 
 ```ts
-const shopperEntities: [ShopperEntity[], number] =
-  await this.dynamicRepository.findOne<ShopperEntity>(
-    ShopperEntity,
+const pageEntities: [PageEntity[], number] =
+  await this.dynamicRepository.findOne<PageEntity>(
+    PageEntity,
     {
       selections: [] // You can also get rid of this
       where: [
         {
           field: 'id',
           operator: FilterOperator.EQUAL,
-          value: shopperId,
+          value: id,
         },
       ],
       ordering: [] // You can also get rid of this
@@ -147,7 +147,10 @@ const shopperEntities: [ShopperEntity[], number] =
 ...
 ```
 
-## NOTES
+## IMPORTANT NOTES
 
 > [!CAUTION]
-> Please note that **entity property names (e.g. articles.id, shopperId)** need to be specified, not db or response field names (e.g. article_id, order_shopper_id, shopper_Id)
+> Please note that **entity property names (e.g. posts.id, id)** need to be specified, not db or response field names (e.g. page_id, page_post_id...)
+
+> [!CAUTION]
+> This solution will not work if there are two columns with the same name in the DB within all entities. E.g. Take entity Person (personId: string, personName: string, descriptionField: string) which can have many Property (id: string, name: string, location: string, person: Person). By default TypeORM will map DB table column names into Person (person_id, person_name, description_field) and Property (id, name, location, person_id). As you can see person_id will be duplicated and this solution will fail to execute. Just be mindful when setting column names

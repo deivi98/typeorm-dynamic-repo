@@ -1,4 +1,12 @@
-# Dynamic Repository Module
+# Dynamic Repository
+This is a hacky way to get into TypeORM code and build some find functions that actually allow to query, filter, sort and paginate at any given entity, at any given Nth-level relation. Even if there is cyclical relations. To make it work, it uses TypeORM internal functions to dynamically build the query, using entity metadata, such as "eager" etc.
+
+This allows services to expose many filtering and selection capabilities in their endpoints that clients can use at will, at the same time it is a generic solution to avoid the need of using query builders (which remain good for very very specific scenarios).
+
+## How does it work
+1. You call of the find functions
+2. Args will be used to build a Query tree (similar to GraphQL's approach), which will only select desired attributes, join needed relations and add relevant filtering and sorting.
+3. The Query Tree is passed into internal code which will actually use TypeORM query builder to build query dynamically while recursively exploring query tree
 
 ## Querying entities
 
